@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Form</title>
+  <link rel="stylesheet" href="style_signup.css">
+</head>
+<body>
+  <div class="wrapper">
+    <h2>Registration</h2>
+    <form id="register-form" action="#">
+      <div class="input-box">
+        <input type="text" id="regname" placeholder="Enter your name" required>
+      </div>
+      <div class="input-box">
+        <input type="text" id="regemail" placeholder="Enter your email" required>
+      </div>
+      <div class="input-box">
+        <input type="password" id="regpass" placeholder="Create password" required>
+      </div>
+      <div class="input-box">
+        <input type="number" id="regphone" placeholder="Mobile number" required>
+      </div>
+      <!-- Roll Number field -->
+      <div class="input-box">
+        <input type="text" id="regroll" placeholder="Enter your roll number" required>
+      </div>
+      <!-- CAPTCHA entry -->
+      <div class="input-box">
+        <input type="text" id="captcha" placeholder="Enter CAPTCHA" required>
+      </div>
+      <!-- CAPTCHA display and refresh -->
+      <div id="captcha-container" class="input-box">
+        <span id="captcha-display"></span>
+        <button id="refresh-captcha">Refresh</button>
+      </div>
+      
+      <div class="input-box button">
+        <input type="submit" value="Register Now">
+      </div>
+      <div class="text">
+        <h3>Already have an account? <a href="login.html">Login now</a></h3>
+      </div>
+    </form>
+  </div>
+  <script src="script_signup.js"></script>
+</body>
+</html>

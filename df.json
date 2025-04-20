@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "lucky-fastness-457118-s6",
+  "private_key_id": "2a0b0ed08a4d4370bc8d3259c8ee108cb0dbd069",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCwp4vwAV7SAUGM\n0BB4Ct6ZKw5w+Niq1sltdVijQ8p/jSS7OhILe3DXIhDvs0TTxWDGO40KwtrxEi4c\nuILoQfaA4WzZLLVIbxEhotYRnXrI/7DnPqjtKRSgH1kOAMxkK/2TH8sZQq/OOs/S\nGVqcppzeDMXo9JWMB+I+GZLff1XL1E1vDE42a+vJ3rUeydirVpYRgtVDmcUUSLWp\nEhWsXizUvJbyrTMeUpeYWkUsRHlxNimo7njC34dFOxtjLYkNR586sYEZKRnYi7hq\nL8FXAFY0MWUoKsQpzEAPcVu1oFX3IxsAMH6Zbh5gq1IgVctrmSYTjYY/ZWmhZhUP\nx9v9UzJJAgMBAAECggEAB8bIZT9aMjp17UH3h6FK3UlE8Hoz54lfAp+I0F8amfTX\nqhpLUxATDpVkU3j7zarBsNhMRC4Bv10ChKcmtBy7Qj8qMIFEVbT19xoY/FuHXTPM\nUNG0VARb8RSQMgqc9Mfu+LwMj8ccwCJcpa4SDBVVkHzVdYTW1HxAXGV5zrbnSvqx\n0tXJ0GjRLuLRvW1TuCwlRMJnvC2lbOFRaz2G3kgscVFEer9LutQchIyuwgxNaltK\nGu3bTtFcIB1+ZOLv40kNS4r8nCS2pJHJScNmmDGqBEVOKXTEndM8rQsXB8/y4qe5\ncHkHu1RzE7T+/LfKPvo4QWmQKNsCtYXhRmv7byy+UQKBgQDfkCNGtjIuZ0rZ6DnR\ngwOhd8owhoRpAANvHyKfhLi+vsNZqwNT50AiqmUSGExeimSvh/dtxFdzJPuaPMh0\nQPuYG0gGwvTm0Y/ganvZCW3cEx8NRxZDPdz0LHdVSg1FD80hBPlFKJPG/+65LZ2o\nq4sYsJbdmdZ8LJsL4L9wTxFCDQKBgQDKSRJSdto1YYM1FGTNFKMLPH1p2wq/JjfC\n5T+UV3h3RUuDu+0XMh32KFPaMIlSqElRHScdvwbiv0twQbIfg+ULPY6OM6hIkJLL\nWYevjHZUVXxBGHTzsR3Wdy9CaePuJ51Pl8qBjOCEQ4lV+ow3F1Qh1Acc2im4Qbfj\nFvaCS01uLQKBgQDAhio63PA+Eend2iTgjkj0JmrSeyVQHxjV+yQf53YJndIxSBpn\niQAsWj0L5izuRZQLrbWgq7L7j9+0pZ+irct85BGU8RNiKxoSEuFwuLQJD9Zv4sYD\nRiUfiaOCqXDgBomKY/QeYKFSgFie0++vr3rr2jcxwyd4bBlhkzyJhS3BiQKBgQC4\nlw2dKs/cvmsY2M9TRW2zJzPakQOxgpKHyuLF3zwSuq06PRcRf65PnmVGSdxGDUM6\nPbwgLN1/tMiGW6zLjXRJWZbotMLv1N3fqodi7m5cbtXAIS0343wy5Pe/RxmzjXrD\n0uP8bC3FBEwipUumSid/5xfGgF5pwa6oD6BLLaQu0QKBgQCzG5NBoIayOiGCetJB\nuRMlKyWiVBkmik6A0eaZrjR72vdhpoc4x7i7KrcNuwkKaxkDz4AdjP1UmBQfgUr2\nimBoMFNtnChe67BL2xj7iuYYXNywy+6Z+/dHhWcsG2naJ7Uh8RoywVRwQ46Aj+nX\n+72UiIrIRPVUtWIYT+C9OisTzg==\n-----END PRIVATE KEY-----\n",
+  "client_email": "mls-964@lucky-fastness-457118-s6.iam.gserviceaccount.com",
+  "client_id": "104633852398279616523",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/mls-964%40lucky-fastness-457118-s6.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

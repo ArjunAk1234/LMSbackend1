@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -30,6 +29,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"github.com/jung-kurt/gofpdf"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -98,7 +98,7 @@ var submissionCollection *mongo.Collection
 
 // Initialize MongoDB connection
 func init() {
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
+	clientOptions := options.Client().ApplyURI("mongodb+srv://ananthakrishnans0608:CUUx3fXeWYDcJGNf@lms1.zefizq5.mongodb.net/?retryWrites=true&w=majority&appName=LMS1")
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		log.Fatalf("MongoDB Connection Error: %v", err)
@@ -2299,30 +2299,170 @@ func ForgotPassword(c *gin.Context) {
 
 var firebaseStorage *storage.BucketHandle
 
+// func initFirebase() *storage.BucketHandle {
+// 	ctx := context.Background()
+// 	config := &firebase.Config{
+// 		StorageBucket: "lms1-afef0.firebasestorage.app", // replace with actual bucket name
+// 	}
+// 	opt := option.WithCredentialsFile("E:\\summer school\\Summer-School-main\\Summer-School-main\\Backend\\credentials.json")
+
+// 	app, err := firebase.NewApp(ctx, config, opt)
+// 	if err != nil {
+// 		log.Fatalf("Error initializing Firebase: %v", err)
+// 	}
+
+// 	client, err := app.Storage(ctx)
+// 	if err != nil {
+// 		log.Fatalf("Error getting Firebase Storage client: %v", err)
+// 	}
+
+// 	bucket, err := client.DefaultBucket()
+// 	if err != nil {
+// 		log.Fatalf("Error getting default bucket: %v", err)
+// 	}
+
+// 		return bucket
+// 	}
+
 func initFirebase() *storage.BucketHandle {
 	ctx := context.Background()
 	config := &firebase.Config{
-		StorageBucket: "lms1-afef0.firebasestorage.app", // replace with actual bucket name
-	}
-	opt := option.WithCredentialsFile("credentials.json")
-
-	app, err := firebase.NewApp(ctx, config, opt)
-	if err != nil {
-		log.Fatalf("Error initializing Firebase: %v", err)
+		StorageBucket: os.Getenv("FIREBASE_STORAGE_BUCKET"), // Get from environment variable
 	}
 
-	client, err := app.Storage(ctx)
+	var app *firebase.App
+	var err error
+
+	// Check if running in production or development
+	if credentialsPath := os.Getenv("FIREBASE_CREDENTIALS_PATH"); credentialsPath != "" {
+		// Development: Use file path from environment variable
+		println(credentialsPath)
+		opt := option.WithCredentialsFile(credentialsPath)
+		app, err = firebase.NewApp(ctx, config, opt)
+		if err != nil {
+			log.Fatalf("Error initializing Firebase: %v", err)
+		}
+	} else if credentialsJSON := os.Getenv("FIREBASE_CREDENTIALS_JSON"); credentialsJSON != "" {
+		// Production: Use credentials JSON string from environment variable
+		opt := option.WithCredentialsJSON([]byte(credentialsJSON))
+		app, err = firebase.NewApp(ctx, config, opt)
+		if err != nil {
+			log.Fatalf("Error initializing Firebase: %v", err)
+		}
+	} else {
+		// If deployed to Google Cloud Platform with appropriate service account
+		app, err = firebase.NewApp(ctx, config)
+		if err != nil {
+			log.Fatalf("Error initializing Firebase: %v", err)
+		}
+	}
+
+	// Get Firebase Storage client
+	firebaseStorage, err := app.Storage(ctx)
 	if err != nil {
 		log.Fatalf("Error getting Firebase Storage client: %v", err)
 	}
 
-	bucket, err := client.DefaultBucket()
+	// Get the bucket handle
+	bucket, err := firebaseStorage.Bucket(os.Getenv("FIREBASE_STORAGE_BUCKET"))
 	if err != nil {
-		log.Fatalf("Error getting default bucket: %v", err)
+		log.Fatalf("Error getting bucket: %v", err)
 	}
 
 	return bucket
 }
+
+// func initFirebase() *storage.BucketHandle {
+// 	ctx := context.Background()
+
+// 	// Load credentials from env
+// 	credsData := os.Getenv("FIREBASE_CREDENTIALS")
+// 	if credsData == "" {
+// 		log.Fatal("Missing FIREBASE_CREDENTIALS environment variable")
+// 	}
+
+// 	// Write to temp file
+// 	tmpFile, err := os.CreateTemp("", "firebase-creds-*.json")
+// 	if err != nil {
+// 		log.Fatalf("Error creating temp file: %v", err)
+// 	}
+// 	defer tmpFile.Close()
+
+// 	_, err = tmpFile.Write([]byte(credsData))
+// 	if err != nil {
+// 		log.Fatalf("Error writing credentials to temp file: %v", err)
+// 	}
+
+// 	config := &firebase.Config{
+// 		StorageBucket: "lms1-afef0.appspot.com", // Use `.appspot.com`
+// 	}
+// 	opt := option.WithCredentialsFile(tmpFile.Name())
+
+// 	app, err := firebase.NewApp(ctx, config, opt)
+// 	if err != nil {
+// 		log.Fatalf("Error initializing Firebase: %v", err)
+// 	}
+
+// 	client, err := app.Storage(ctx)
+// 	if err != nil {
+// 		log.Fatalf("Error getting Firebase Storage client: %v", err)
+// 	}
+
+// 	bucket, err := client.DefaultBucket()
+// 	if err != nil {
+// 		log.Fatalf("Error getting default bucket: %v", err)
+// 	}
+
+//		return bucket
+//	}
+
+// func initFirebase() *storage.BucketHandle {
+// ctx := context.Background()
+
+// 	// Get base64-encoded credentials from env
+// 	credsData := os.Getenv("FIREBASE_CREDENTIALS_BASE64")
+// 	if credsData == "" {
+// 		log.Fatal("Missing FIREBASE_CREDENTIALS_BASE64 environment variable")
+// 	}
+
+// 	decoded, err := base64.StdEncoding.DecodeString(credsData)
+// 	if err != nil {
+// 		log.Fatalf("Error decoding credentials: %v", err)
+// 	}
+
+// 	tmpFile, err := os.CreateTemp("", "firebase-creds-*.json")
+// 	if err != nil {
+// 		log.Fatalf("Error creating temp file: %v", err)
+// 	}
+// 	defer tmpFile.Close()
+
+// 	_, err = tmpFile.Write(decoded)
+// 	if err != nil {
+// 		log.Fatalf("Error writing credentials to temp file: %v", err)
+// 	}
+
+// 	opt := option.WithCredentialsFile(tmpFile.Name())
+// 	config := &firebase.Config{
+// 		StorageBucket: "lms1-afef0.appspot.com",
+// 	}
+
+// 	app, err := firebase.NewApp(ctx, config, opt)
+// 	if err != nil {
+// 		log.Fatalf("Error initializing Firebase: %v", err)
+// 	}
+
+// 	client, err := app.Storage(ctx)
+// 	if err != nil {
+// 		log.Fatalf("Error getting Firebase Storage client: %v", err)
+// 	}
+
+// 	bucket, err := client.DefaultBucket()
+// 	if err != nil {
+// 		log.Fatalf("Error getting default bucket: %v", err)
+// 	}
+
+// 	return bucket
+// }
 
 // func uploadResource(c *gin.Context) {
 // 	courseName := c.Param("course")
@@ -2381,6 +2521,55 @@ func initFirebase() *storage.BucketHandle {
 
 //		c.JSON(http.StatusCreated, gin.H{"message": "Resource uploaded successfully", "fileURL": downloadURL})
 //	}
+
+// func initFirebase() *storage.BucketHandle {
+// 	ctx := context.Background()
+
+// 	// Get bucket name from environment variable
+// 	bucketName := os.Getenv("FIREBASE_STORAGE_BUCKET")
+// 	if bucketName == "" {
+// 		bucketName = "lms1-afef0.appspot.com" // Default value as fallback
+// 	}
+
+// 	config := &firebase.Config{
+// 		StorageBucket: bucketName,
+// 	}
+
+// 	// Get base64 encoded credentials from environment variable
+// 	encodedCreds := os.Getenv("FIREBASE_CREDENTIALS")
+// 	if encodedCreds == "" {
+// 		log.Fatalf("FIREBASE_CREDENTIALS environment variable not set")
+// 	}
+
+// 	// Decode the base64 encoded credentials
+// 	decodedCreds, err := base64.StdEncoding.DecodeString(encodedCreds)
+// 	if err != nil {
+// 		log.Fatalf("Error decoding credentials: %v", err)
+// 	}
+
+// 	// Use decoded credentials JSON
+// 	opt := option.WithCredentialsJSON(decodedCreds)
+
+// 	app, err := firebase.NewApp(ctx, config, opt)
+// 	if err != nil {
+// 		log.Fatalf("Error initializing Firebase: %v", err)
+// 	}
+
+// 	client, err := app.Storage(ctx)
+// 	if err != nil {
+// 		log.Fatalf("Error getting Firebase Storage client: %v", err)
+// 	}
+
+// 	bucket, err := client.DefaultBucket()
+// 	if err != nil {
+// 		log.Fatalf("Error getting default bucket: %v", err)
+// 	}
+
+// 	return bucket
+// }
+
+// Exa
+
 func uploadResource(c *gin.Context) {
 	courseName := c.Param("course")
 	log.Println("Uploading resource for course:", courseName)
@@ -2843,6 +3032,10 @@ func main() {
 		AllowCredentials: true,
 	}))
 	// Routes
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 	firebaseStorage = initFirebase()
 	router.StaticFS("/uploads", http.Dir("uploads"))
 	router.POST("/register", Register)

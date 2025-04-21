@@ -3158,7 +3158,7 @@ func main() {
 	router.GET("/download/:student/:course/:assignment/:filename", downloadStudentSubmission)
 	router.GET("/downloadassignment/:course/:assignment", downloadassiginmnetfile)
 	fmt.Println("Server running on port 8000")
-	    port := os.Getenv("PORT")
+	    port := os.Getenv("PORT1")
     if port == "" {
         port = "8000" // fallback for local development
     }

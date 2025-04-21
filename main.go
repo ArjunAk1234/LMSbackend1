@@ -528,7 +528,7 @@ func Login(c *gin.Context) {
 	// Update login status in DB
 	_, err = userCollection.UpdateOne(ctx, bson.M{"email": input.Email}, bson.M{"$set": bson.M{"loggedIn": "true"}})
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update login status"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update login status","DSC":err})
 		return
 	}
 	// Send token to frontend

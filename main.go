@@ -491,6 +491,54 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
+// func Login(c *gin.Context) {
+// 	var input struct {
+// 		Email    string `json:"email"`
+// 		Password string `json:"password"`
+// 	}
+// 	if err := c.ShouldBindJSON(&input); err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+// 		return
+// 	}
+// 	var user User
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+// 	// Find user by email
+// 	err := userCollection.FindOne(ctx, bson.M{"email": input.Email}).Decode(&user)
+// 	if err != nil || !CheckPasswordHash(input.Password, user.Password) {
+// 		fmt.Println("User not found in DB:", err)
+// 		fmt.Println("Querying for email:", input.Email)
+// 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+// 		return
+// 	}
+
+// 	expirationTime := time.Now().Add(7 * 24 * time.Hour) // Token valid for 7 days
+// 	claims := Claims{
+// 		Email: user.Email,
+// 		StandardClaims: jwt.StandardClaims{
+// 			ExpiresAt: expirationTime.Unix(),
+// 		},
+// 	}
+// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+// 	tokenString, err := token.SignedString(jwtKey)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+// 		return
+// 	}
+// 	// Update login status in DB
+// 	_, err = userCollection.UpdateOne(ctx, bson.M{"email": input.Email}, bson.M{"$set": bson.M{"loggedIn": "true"}})
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update login status","DSC":err})
+// 		return
+// 	}
+// 	// Send token to frontend
+// 	c.JSON(http.StatusOK, gin.H{
+// 		"message": "Login successful!",
+// 		"token":   tokenString,
+// 	})
+// }
+import "strings"
+
 func Login(c *gin.Context) {
 	var input struct {
 		Email    string `json:"email"`
@@ -500,19 +548,21 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		return
 	}
+
+	input.Email = strings.ToLower(input.Email) // normalize email
+
 	var user User
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	// Find user by email
+
 	err := userCollection.FindOne(ctx, bson.M{"email": input.Email}).Decode(&user)
 	if err != nil || !CheckPasswordHash(input.Password, user.Password) {
-		fmt.Println("User not found in DB:", err)
-		fmt.Println("Querying for email:", input.Email)
+		fmt.Println("User not found or password mismatch:", err)
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
 		return
 	}
 
-	expirationTime := time.Now().Add(7 * 24 * time.Hour) // Token valid for 7 days
+	expirationTime := time.Now().Add(7 * 24 * time.Hour)
 	claims := Claims{
 		Email: user.Email,
 		StandardClaims: jwt.StandardClaims{
@@ -525,13 +575,20 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
 	}
-	// Update login status in DB
-	_, err = userCollection.UpdateOne(ctx, bson.M{"email": input.Email}, bson.M{"$set": bson.M{"loggedIn": "true"}})
+
+	result, err := userCollection.UpdateOne(ctx,
+		bson.M{"email": input.Email},
+		bson.M{"$set": bson.M{"loggedIn": "true"}},
+	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update login status","DSC":err})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update login status", "details": err.Error()})
 		return
 	}
-	// Send token to frontend
+	if result.MatchedCount == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No matching user found to update login status"})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful!",
 		"token":   tokenString,

@@ -3083,7 +3083,7 @@ func main() {
 	// 	c.Next()
 	// })
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5173","lms-delta-two.vercel.app","lms-git-main-ananthakrishnan-ss-projects-57b1fd34.vercel.app","lms-3zzrxiy3z-ananthakrishnan-ss-projects-57b1fd34.vercel.app"}, // Allow frontend origin
+		AllowOrigins:     []string{"http://localhost:3000", "http://localhost:5173","lms-delta-two.vercel.app"}, // Allow frontend origin
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,

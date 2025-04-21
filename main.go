@@ -783,8 +783,8 @@ func GenerateOTP() string {
 
 // Send OTP via email
 func SendOTP(email, otp string) error {
-	from := "webpage.krctc.project@gmail.com"
-	password := "umzy cqxf odzr qeyj"
+	from := "summerschoolacmamritapuri@gmail.com"
+	password := "mzxa nfhm oqty hpvu"
 	to := []string{email}
 	smtpHost := "smtp.gmail.com"
 	smtpPort := "587"

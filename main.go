@@ -797,7 +797,7 @@ func SendOTP(email, otp string) error {
 
 	// Construct email headers and body
 	subject := "Subject: Your One-Time Password (OTP)\r\n"
-	fromHeader := "From: KRCTC Project <" + from + ">\r\n"
+	fromHeader := "From: Summer School <" + from + ">\r\n"
 	toHeader := "To: " + email + "\r\n"
 	mime := "MIME-Version: 1.0\r\nContent-Type: text/plain; charset=\"UTF-8\"\r\n\r\n"
 

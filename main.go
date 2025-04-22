@@ -456,6 +456,11 @@ func Register(c *gin.Context) {
 		c.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
 		return
 	}
+		err = userCollection.FindOne(ctx, bson.M{"email": input.Email}).Decode(&existingUser)
+	if err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})
+		return
+	}
 	// Hash the password before storing
 	hashedPassword, err := HashPassword(input.Password)
 	if err != nil {

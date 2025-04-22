@@ -785,12 +785,34 @@ func GenerateOTP() string {
 func SendOTP(email, otp string) error {
 	from := "summerschoolacmamritapuri@gmail.com"
 	password := "mzxa nfhm oqty hpvu"
+	// to := []string{email}
+	// smtpHost := "smtp.gmail.com"
+	// smtpPort := "587"
+	// message := []byte("Subject: Your OTP Code\n\nYour OTP is: " + otp)
+	// auth := smtp.PlainAuth("", from, password, smtpHost)
+	// return smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
 	to := []string{email}
 	smtpHost := "smtp.gmail.com"
 	smtpPort := "587"
-	message := []byte("Subject: Your OTP Code\n\nYour OTP is: " + otp)
+
+	// Construct email headers and body
+	subject := "Subject: Your One-Time Password (OTP)\r\n"
+	fromHeader := "From: KRCTC Project <" + from + ">\r\n"
+	toHeader := "To: " + email + "\r\n"
+	mime := "MIME-Version: 1.0\r\nContent-Type: text/plain; charset=\"UTF-8\"\r\n\r\n"
+
+	body := fmt.Sprintf("Hello,\n\nYour OTP is: %s\n\nPlease use it to verify your account.\n\nRegards,\nKRCTC Team", otp)
+
+	message := []byte(fromHeader + toHeader + subject + mime + body)
+
 	auth := smtp.PlainAuth("", from, password, smtpHost)
-	return smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
+
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, message)
+	if err != nil {
+		return fmt.Errorf("failed to send OTP: %v", err)
+	}
+
+	return nil
 }
 
 func RequestOTP1(c *gin.Context) {

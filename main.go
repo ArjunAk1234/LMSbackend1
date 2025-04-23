@@ -2293,7 +2293,7 @@ func deleteAssignment(c *gin.Context) {
 		return
 	}
 
-	// ✅ Remove all student submissions related to this assignment
+	// Remove all student submissions related to this assignment
 	cursor, err := userCollection.Find(context.TODO(), bson.M{}) // You need to have a usersCollection
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to find students"})
@@ -2775,6 +2775,67 @@ func downloadResource(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to stream file"})
 	}
 }
+// func uploadTextNote(c *gin.Context) {
+// 	courseName := c.Param("course")
+// 	log.Println("Uploading note for course:", courseName)
+
+// 	// Check if course exists
+// 	var course Course
+// 	err := coursesCollection.FindOne(context.TODO(), bson.M{"name": courseName}).Decode(&course)
+// 	if err != nil {
+// 		log.Println("Course not found:", err)
+// 		c.JSON(http.StatusNotFound, gin.H{"error": "Course not found"})
+// 		return
+// 	}
+
+// 	var note struct {
+// 		Name    string `json:"name"`
+// 		Content string `json:"content"`
+// 	}
+// 	if err := c.ShouldBindJSON(&note); err != nil {
+// 		log.Println("Invalid request payload:", err)
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request payload"})
+// 		return
+// 	}
+
+// 	if note.Name == "" {
+// 		log.Println("Note name missing")
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": "Note name is required"})
+// 		return
+// 	}
+
+// 	// Upload the note content as .txt to Firebase
+// 	objectPath := fmt.Sprintf("courses/%s/notes/%s.txt", courseName, note.Name)
+// 	ctx := context.Background()
+// 	wc := firebaseStorage.Object(objectPath).NewWriter(ctx)
+
+// 	_, err = wc.Write([]byte(note.Content))
+// 	if err != nil {
+// 		log.Println("Error uploading note to Firebase:", err)
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload note"})
+// 		return
+// 	}
+// 	if err := wc.Close(); err != nil {
+// 		log.Println("Error closing Firebase writer:", err)
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to finish upload"})
+// 		return
+// 	}
+
+// 	// Update DB
+// 	_, err = coursesCollection.UpdateOne(
+// 		context.TODO(),
+// 		bson.M{"name": courseName},
+// 		bson.M{"$push": bson.M{"notes": note.Name + ".txt"}},
+// 	)
+// 	if err != nil {
+// 		log.Println("Failed to update MongoDB:", err)
+// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update course notes in database"})
+// 		return
+// 	}
+
+// 	log.Println("Note uploaded successfully:", note.Name+".txt")
+// 	c.JSON(http.StatusCreated, gin.H{"message": "Note uploaded successfully", "note": note.Name + ".txt"})
+// }
 func uploadTextNote(c *gin.Context) {
 	courseName := c.Param("course")
 	log.Println("Uploading note for course:", courseName)
@@ -2804,7 +2865,27 @@ func uploadTextNote(c *gin.Context) {
 		return
 	}
 
-	// Upload the note content as .txt to Firebase
+	isLink := strings.HasPrefix(note.Content, "http://") || strings.HasPrefix(note.Content, "https://")
+
+	if isLink {
+		// Store the link directly in the database
+		linkEntry := fmt.Sprintf("link:%s|%s", note.Name, note.Content) // or use a more structured format
+		_, err = coursesCollection.UpdateOne(
+			context.TODO(),
+			bson.M{"name": courseName},
+			bson.M{"$push": bson.M{"notes": linkEntry}},
+		)
+		if err != nil {
+			log.Println("Failed to update MongoDB with link:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save link in database"})
+			return
+		}
+		log.Println("Link note saved successfully:", note.Content)
+		c.JSON(http.StatusCreated, gin.H{"message": "Link note saved successfully", "note": linkEntry})
+		return
+	}
+
+	// Upload text content as a .txt file
 	objectPath := fmt.Sprintf("courses/%s/notes/%s.txt", courseName, note.Name)
 	ctx := context.Background()
 	wc := firebaseStorage.Object(objectPath).NewWriter(ctx)
@@ -2836,6 +2917,7 @@ func uploadTextNote(c *gin.Context) {
 	log.Println("Note uploaded successfully:", note.Name+".txt")
 	c.JSON(http.StatusCreated, gin.H{"message": "Note uploaded successfully", "note": note.Name + ".txt"})
 }
+
 func downloadNotes(c *gin.Context) {
 	courseName := c.Param("course")
 	noteName := c.Param("note")
@@ -2888,7 +2970,7 @@ func createAssignment(c *gin.Context) {
 		return
 	}
 
-	// ✅ Check if the course exists
+	// Check if the course exists
 	var course bson.M
 	err := coursesCollection.FindOne(context.TODO(), bson.M{"name": courseName}).Decode(&course)
 	if err != nil {
@@ -2896,7 +2978,7 @@ func createAssignment(c *gin.Context) {
 		return
 	}
 
-	// 📂 **Handle PDF Upload (Optional)**
+	//  **Handle PDF Upload (Optional)**
 	var pdfPath string
 	file, _, err := c.Request.FormFile("pdf")
 	if err == nil { // If PDF is uploaded
@@ -2919,7 +3001,7 @@ func createAssignment(c *gin.Context) {
 		pdfPath = objectPath
 	}
 
-	// ✅ Store assignment details in MongoDB
+	//  Store assignment details in MongoDB
 	assignment := Assignment{
 		CourseName:     courseName,
 		AssignmentName: assignmentName,
@@ -2940,7 +3022,7 @@ func uploadAssignment(c *gin.Context) {
 	courseName := c.Param("course")
 	assignmentName := c.Param("assignment")
 
-	// 📂 Parse uploaded file
+	//  Parse uploaded file
 	file, handler, err := c.Request.FormFile("file")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "File upload error"})
@@ -2948,7 +3030,7 @@ func uploadAssignment(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// ✅ Validate file type (PDF or code files)
+	//  Validate file type (PDF or code files)
 	allowedExtensions := []string{".pdf", ".cpp", ".py", ".java", ".txt", ".js"}
 	ext := strings.ToLower(filepath.Ext(handler.Filename))
 	isValid := slices.Contains(allowedExtensions, ext)
@@ -2957,7 +3039,7 @@ func uploadAssignment(c *gin.Context) {
 		return
 	}
 
-	// ✅ Create student assignment directory in Firebase Storage
+	//  Create student assignment directory in Firebase Storage
 	objectPath := fmt.Sprintf("students/%s/%s/assignments/%s/%s", studentName, courseName, assignmentName, handler.Filename)
 	ctx := context.Background()
 	wc := firebaseStorage.Object(objectPath).NewWriter(ctx)
@@ -2973,7 +3055,7 @@ func uploadAssignment(c *gin.Context) {
 		return
 	}
 
-	// ✅ Check if the assignment exists in the DB
+	// Check if the assignment exists in the DB
 	filter := bson.M{"coursename": courseName, "assignmentname": assignmentName}
 	var existingAssignment bson.M
 	err = assignmentsCollection.FindOne(context.TODO(), filter).Decode(&existingAssignment)
@@ -2982,7 +3064,7 @@ func uploadAssignment(c *gin.Context) {
 		return
 	}
 
-	// ✅ Update MongoDB - Add the submission path to the assignment
+	//  Update MongoDB - Add the submission path to the assignment
 	update := bson.M{
 		"$push": bson.M{
 			"submissions": bson.M{
@@ -3002,7 +3084,7 @@ func uploadAssignment(c *gin.Context) {
 		return
 	}
 
-	// ✅ Debugging output
+	// Debugging output
 	if result.ModifiedCount == 0 {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Assignment found but not updated. Check field names."})
 		return

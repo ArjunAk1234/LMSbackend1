@@ -1716,21 +1716,38 @@ func GetCurrentUserStats(c *gin.Context) {
 	var userStats bson.M
 	err = leaderboardCollection.FindOne(ctx, bson.M{"username": username}).Decode(&userStats)
 	if err != nil {
+		// if err == mongo.ErrNoDocuments {
+		// 	// User doesn't exist in leaderboard yet, create entry with 0 points
+		// 	newEntry := bson.M{
+		// 		"username": username,
+		// 		"email":    email,
+		// 		"points":   0,
+		// 	}
+
+		// 	_, err = leaderboardCollection.InsertOne(ctx, newEntry)
+		// 	if err != nil {
+		// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create leaderboard entry"})
+		// 		return
+		// 	}
+
+		// 	userStats = newEntry
 		if err == mongo.ErrNoDocuments {
 			// User doesn't exist in leaderboard yet, create entry with 0 points
-			newEntry := bson.M{
-				"username": username,
-				"email":    email,
-				"points":   0,
-			}
+			if user.Role == "student" {
+				newEntry := bson.M{
+					"username": username,
+					"email":    email,
+					"points":   0,
+				}
 
-			_, err = leaderboardCollection.InsertOne(ctx, newEntry)
-			if err != nil {
-				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create leaderboard entry"})
-				return
-			}
+				_, err = leaderboardCollection.InsertOne(ctx, newEntry)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create leaderboard entry"})
+					return
+				}
 
-			userStats = newEntry
+				userStats = newEntry
+			}
 		} else {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user stats"})
 			return
